@@ -1,12 +1,42 @@
+*{
+    box-sizing: border-box;
+}
+
 .mainContainer{
     background-color: grey;
     display: flex;
     flex-flow: row;
     justify-content: space-between;
+    padding: 10px;
 }
 
 .functionDiv{
     background-color: yellow;
-    border: 1px solid red;
     width: 20%;
+    padding: 10px;
+}
+
+.functionDiv form div{
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    margin: 10px 0;
+}
+
+.functionDiv form label{
+    width: 30%;
+}
+
+.functionDiv form input{
+    width: 70%;
+}
+
+table{
+    width: 100%;
+}
+
+td{
+    width: 20%;
+    text-align: center;
+    padding: 10px;
 }

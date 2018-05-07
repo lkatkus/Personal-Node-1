@@ -1,0 +1,25 @@
+<h2>READ TEMPLATE</h2>
+
+<div class="mainContainer">
+    
+    <table>
+        
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Password</th>
+            <th>Email</th>
+        </tr>
+
+        {{#each data}}
+            <tr>
+                <td>{{ _id }}</td>
+                <td>{{ userName }}</td>
+                <td>{{ userPassword }}</td>
+                <td>{{ userEmail }}</td>
+            </tr>
+        {{/each}}
+
+    </table>
+
+</div>
