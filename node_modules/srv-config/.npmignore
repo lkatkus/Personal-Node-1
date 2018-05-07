@@ -1,0 +1,5 @@
+# NetBeans project private settings
+/nbproject/private/
+
+# Dependency directories
+node_modules

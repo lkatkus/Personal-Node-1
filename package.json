@@ -1,0 +1,14 @@
+{
+  "name": "1-crud",
+  "version": "1.0.0",
+  "description": "Basic CRUD",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "LK",
+  "license": "ISC",
+  "dependencies": {
+    "srv-main": "^1.0.4"
+  }
+}
