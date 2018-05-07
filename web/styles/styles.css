@@ -1,0 +1,12 @@
+.mainContainer{
+    background-color: grey;
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+}
+
+.functionDiv{
+    background-color: yellow;
+    border: 1px solid red;
+    width: 20%;
+}
