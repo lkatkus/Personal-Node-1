@@ -17,6 +17,8 @@ class BasicCrud extends Middleware {
         super(app, router);
     }
 
+
+
     bindToRouter() {
 
         this.router.get("/index", (req, res, next) => {
@@ -34,28 +36,33 @@ class BasicCrud extends Middleware {
                 userEmail: req.body.userEmail
             };
 
-            // Validate data
-            
-            // Connect to database
-            mongo.connect(DB_URL, function(err, database){
-                
-                // Check if able to connect to database
-                if(err || database === null){
-                    console.log(err);
-                    res.render('index',{ error:'Failed to connect to database' });
+            // Validate
+            if(validate(userData)){
+                // Connect to database
+                mongo.connect(DB_URL, function(err, database){
+                    
+                    // Check if able to connect to database
+                    if(err || database === null){
+                        console.log(err);
+                        res.render('index',{ error:'Failed to connect to database' });
 
-                }else{
-                    // Set database which will be used
-                    let db = database.db(DB_NAME);
+                    }else{
+                        // Set database which will be used
+                        let db = database.db(DB_NAME);
 
-                    db.collection(DB_COLLECTION).insertOne(userData, function(err, result){
-                        // Close connection after data was inserted
-                        database.close();
-                        // Redirect to /read
-                        res.redirect('/read');
-                    })
-                }
-            })
+                        db.collection(DB_COLLECTION).insertOne(userData, function(err, result){
+                            // Close connection after data was inserted
+                            database.close();
+                            // Redirect to /read
+                            res.redirect('/read');
+                        })
+                    }
+                })
+
+            }else{
+                res.render('index',{ error:'Validation error' });
+            }
+
         });
 
         this.router.get("/read", function(req, res, next) {
@@ -111,38 +118,42 @@ class BasicCrud extends Middleware {
                 let userId = objectId(req.body.userId);
 
                 // Validate data
-            
-                // Connect to database
-                mongo.connect(DB_URL, function(err, database){
-                    
-                    // Check if able to connect to database
-                    if(err || database === null){
-                        console.log(err);
-                        res.render('index',{ error:'Failed to connect to database' });
+                if(validate(userData)){
+                    // Connect to database
+                    mongo.connect(DB_URL, function(err, database){
+                        
+                        // Check if able to connect to database
+                        if(err || database === null){
+                            console.log(err);
+                            res.render('index',{ error:'Failed to connect to database' });
 
-                    }else{
-                        // Set database which will be used
-                        let db = database.db(DB_NAME);
+                        }else{
+                            // Set database which will be used
+                            let db = database.db(DB_NAME);
 
-                        // Update user data
-                        db.collection(DB_COLLECTION).updateOne({"_id": userId}, {$set: userData}, function(err, result){
-                            
-                            // Check if user data was updated
-                            if(result.result.n === 0){
-                                // Close connection after data was updated
-                                database.close();
-                                // Redirect to /read
-                                res.render('index',{ error:'Failed to update user' });
-                            
-                            }else{
-                                // Close connection after data was updated
-                                database.close();
-                                // Redirect to /read
-                                res.redirect('/read');                                
-                            }
-                        })
-                    }
-                })                
+                            // Update user data
+                            db.collection(DB_COLLECTION).updateOne({"_id": userId}, {$set: userData}, function(err, result){
+                                
+                                // Check if user data was updated
+                                if(result.result.n === 0){
+                                    // Close connection after data was updated
+                                    database.close();
+                                    // Redirect to /read
+                                    res.render('index',{ error:'Failed to update user' });
+                                
+                                }else{
+                                    // Close connection after data was updated
+                                    database.close();
+                                    // Redirect to /read
+                                    res.redirect('/read');                                
+                                }
+                            })
+                        }
+                    }) 
+                
+                }else{
+                    res.render('index',{ error:'Validation error' });
+                }
             }
         });
 
@@ -184,7 +195,13 @@ class BasicCrud extends Middleware {
                     }
                 })
             }
-         });
+        });
+
+        // User data validation. Should return true if data is valid
+        const validate = (data) => {
+            // WORK IN PROGRESS ...
+            return true;
+        }
     }
 }
 
