@@ -19,9 +19,9 @@ class BasicCrud extends Middleware {
 
     bindToRouter() {
 
-        // this.router.get("/", (req, res, next) => {
-        //     res.render('index',{ title: 'handlebars test' });
-        // })
+        this.router.get("/index", (req, res, next) => {
+            res.render('index');
+        });
         
         this.router.post("/create", function(req, res, next) {
             // Create user placeholder object
@@ -42,7 +42,7 @@ class BasicCrud extends Middleware {
                 // Check if able to connect to database
                 if(err || database === null){
                     console.log(err);
-                    res.redirect('/');
+                    res.render('index',{ error:'Failed to connect to database' });
 
                 }else{
                     // Set database which will be used
@@ -69,7 +69,7 @@ class BasicCrud extends Middleware {
                 // Check if able to connect to database
                 if(err || database === null){
                     console.log(err);
-                    res.redirect('/');
+                    res.render('index',{ error:'Failed to connect to database' });
 
                 }else{
                     // Set database which will be used
@@ -85,7 +85,7 @@ class BasicCrud extends Middleware {
                         // Callback function to be executed after data has been collected from db
                         database.close();
                         // Send data to handlebars template
-                        res.render('read',{ title: 'handlebars test', data: resultArray });
+                        res.render('index',{ title: 'handlebars test', userData: resultArray });
                     });
                 }
             })
@@ -102,37 +102,55 @@ class BasicCrud extends Middleware {
                 userEmail: req.body.userEmail
             };
 
-            // Get user to be deleted id
-            let userId = req.body.userId;
-
-            // Validate data
+            // Check if userId is valid objectId and redirect if invalid
+            if(!objectId.isValid(req.body.userId)){
+                res.render('index',{ error: 'Invalid User Id' });
             
-            // Connect to database
-            mongo.connect(DB_URL, function(err, database){
-                
-                // Check if able to connect to database
-                if(err || database === null){
-                    res.redirect('/');
+            }else{
+                // Convert userId to mongo objectId
+                let userId = objectId(req.body.userId);
 
-                }else{
-                    // Set database which will be used
-                    let db = database.db(DB_NAME);
+                // Validate data
+            
+                // Connect to database
+                mongo.connect(DB_URL, function(err, database){
+                    
+                    // Check if able to connect to database
+                    if(err || database === null){
+                        console.log(err);
+                        res.render('index',{ error:'Failed to connect to database' });
 
-                    db.collection(DB_COLLECTION).updateOne({"_id": objectId(userId)}, {$set: userData}, function(err, result){
-                        // Close connection after data was updated
-                        database.close();
-                        // Redirect to /read
-                        res.redirect('/read');
-                    })
-                }
-            })
+                    }else{
+                        // Set database which will be used
+                        let db = database.db(DB_NAME);
+
+                        // Update user data
+                        db.collection(DB_COLLECTION).updateOne({"_id": userId}, {$set: userData}, function(err, result){
+                            
+                            // Check if user data was updated
+                            if(result.result.n === 0){
+                                // Close connection after data was updated
+                                database.close();
+                                // Redirect to /read
+                                res.render('index',{ error:'Failed to update user' });
+                            
+                            }else{
+                                // Close connection after data was updated
+                                database.close();
+                                // Redirect to /read
+                                res.redirect('/read');                                
+                            }
+                        })
+                    }
+                })                
+            }
         });
 
         this.router.post("/delete", function(req, res, next) {         
             
             // Check if userId is valid objectId and redirect if invalid
             if(!objectId.isValid(req.body.userId)){
-                res.render('read',{ error: 'Invalid User Id' });
+                res.render('index',{ error: 'Invalid User Id' });
             
             }else{
                 // Convert userId to mongo objectId
@@ -144,7 +162,7 @@ class BasicCrud extends Middleware {
                     // Check if able to connect to database
                     if(err || database === null){
                         console.log(err);
-                        res.redirect('/');
+                        res.render('index',{ error:'Failed to connect to database' });
                     
                     }else{
                         // Set database which will be used

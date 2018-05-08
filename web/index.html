@@ -1,84 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+<script>
 
-    <link rel="stylesheet" href="/styles/styles.css">
-</head>
-<body>
-    <h1>NodeJS CRUD</h1>
-    <div class="mainContainer">
+    function redirect() {
+        window.location.assign("/index");
+    }
 
-        <div class="functionDiv">
-            <h2>Create</h2>
-            <form action="/create" method="POST">
-                <div>
-                    <label for="userName">User name</label>
-                    <input type="text" name="userName" placeholder="Enter username" value="testName">
-                </div>
+    redirect();
 
-                <div>
-                    <label for="userName">Password</label>
-                    <input type="text" name="userPassword" placeholder="Enter password" value="testPass">
-                </div>
-
-                <div>
-                    <label for="userName">Email</label>
-                    <input type="text" name="userEmail" placeholder="Enter email" value="test@test.com">
-                </div>
-                
-                <button type="submit">Create user</button>
-            </form>
-        </div>
-        
-        <div class="functionDiv">
-            <h2>Read</h2>
-            <form action="/read" method="GET">
-                <button type="submit">Get data</button>
-            </form>
-        </div>
-
-        <div class="functionDiv">
-            <h2>Update</h2>
-            <form action="/update" method="POST">
-                <div>
-                    <label for="userId">User Id</label>
-                    <input type="text" name="userId" placeholder="Enter User ID">
-                </div>
-                
-                <div>
-                    <label for="userName">User name</label>
-                    <input type="text" name="userName" placeholder="Enter username">
-                </div>
-
-                <div>
-                    <label for="userName">Password</label>
-                    <input type="text" name="userPassword" placeholder="Enter password">
-                </div>
-
-                <div>
-                    <label for="userName">Email</label>
-                    <input type="text" name="userEmail" placeholder="Enter email">
-                </div>
-                
-                <button type="submit">Update user</button>
-            </form>
-        </div>
-
-        <div class="functionDiv">
-            <h2>Delete</h2>
-            <form action="/delete" method="POST">
-                <div>
-                    <label for="userId">User Id</label>
-                    <input type="text" name="userId" placeholder="Enter User ID">
-                </div>
-                <button type="submit">Delete user</button>
-            </form>
-        </div>
-
-    </div>
-</body>
-</html>
+</script>
