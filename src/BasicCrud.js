@@ -18,7 +18,11 @@ class BasicCrud extends Middleware {
     }
 
     bindToRouter() {
-               
+
+        // this.router.get("/", (req, res, next) => {
+        //     res.render('index',{ title: 'handlebars test' });
+        // })
+        
         this.router.post("/create", function(req, res, next) {
             // Create user placeholder object
             let userData = {};
@@ -34,15 +38,23 @@ class BasicCrud extends Middleware {
             
             // Connect to database
             mongo.connect(DB_URL, function(err, database){
-                // Set database which will be used
-                let db = database.db(DB_NAME);
+                
+                // Check if able to connect to database
+                if(err || database === null){
+                    console.log(err);
+                    res.redirect('/');
 
-                db.collection(DB_COLLECTION).insertOne(userData, function(err, result){
-                    // Close connection after data was inserted
-                    database.close();
-                    // Redirect to /read
-                    res.redirect('/read');
-                })
+                }else{
+                    // Set database which will be used
+                    let db = database.db(DB_NAME);
+
+                    db.collection(DB_COLLECTION).insertOne(userData, function(err, result){
+                        // Close connection after data was inserted
+                        database.close();
+                        // Redirect to /read
+                        res.redirect('/read');
+                    })
+                }
             })
         });
 
@@ -53,22 +65,29 @@ class BasicCrud extends Middleware {
             
             // Connect to database
             mongo.connect(DB_URL, function(err, database){
+                
+                // Check if able to connect to database
+                if(err || database === null){
+                    console.log(err);
+                    res.redirect('/');
 
-                // Set database which will be used
-                let db = database.db(DB_NAME);
-            
-                // Get cursor pointing to all data in selected database
-                let cursor = db.collection(DB_COLLECTION).find();
-            
-                // Loop through all received cursors and push data to placeholder array
-                cursor.forEach(function(doc, err){
-                    resultArray.push(doc);
-                },() => {
-                    // Callback function to be executed after data has been collected from db
-                    database.close();
-                    // Send data to handlebars template
-                    res.render('index',{ title: 'handlebars test', data: resultArray });
-                });
+                }else{
+                    // Set database which will be used
+                    let db = database.db(DB_NAME);
+                
+                    // Get cursor pointing to all data in selected database collection
+                    let cursor = db.collection(DB_COLLECTION).find();
+                
+                    // Loop through all received cursors and push data to placeholder array
+                    cursor.forEach(function(doc, err){
+                        resultArray.push(doc);
+                    },() => {
+                        // Callback function to be executed after data has been collected from db
+                        database.close();
+                        // Send data to handlebars template
+                        res.render('read',{ title: 'handlebars test', data: resultArray });
+                    });
+                }
             })
         });
 
@@ -90,38 +109,64 @@ class BasicCrud extends Middleware {
             
             // Connect to database
             mongo.connect(DB_URL, function(err, database){
-                // Set database which will be used
-                let db = database.db(DB_NAME);
+                
+                // Check if able to connect to database
+                if(err || database === null){
+                    res.redirect('/');
 
-                db.collection(DB_COLLECTION).updateOne({"_id": objectId(userId)}, {$set: userData}, function(err, result){
-                    // Close connection after data was updated
-                    database.close();
-                    // Redirect to /read
-                    res.redirect('/read');
-                })
+                }else{
+                    // Set database which will be used
+                    let db = database.db(DB_NAME);
+
+                    db.collection(DB_COLLECTION).updateOne({"_id": objectId(userId)}, {$set: userData}, function(err, result){
+                        // Close connection after data was updated
+                        database.close();
+                        // Redirect to /read
+                        res.redirect('/read');
+                    })
+                }
             })
         });
 
-        this.router.post("/delete", function(req, res, next) {
-            // Get user to be deleted id
-            let userId = req.body.userId;
+        this.router.post("/delete", function(req, res, next) {         
+            
+            // Check if userId is valid objectId and redirect if invalid
+            if(!objectId.isValid(req.body.userId)){
+                res.render('read',{ error: 'Invalid User Id' });
+            
+            }else{
+                // Convert userId to mongo objectId
+                let userId = objectId(req.body.userId);
 
-            // Connect to database
-            mongo.connect(DB_URL,function(err, database){
-                
-                // Set database which will be used
-                let db = database.db(DB_NAME);
-                
-                // Find and delete document by id
-                db.collection(DB_COLLECTION).deleteOne({"_id": objectId(userId)}, function(err, result){
-
-                    // Close connection after document was deleted
-                    database.close();
-                    // Redirect to /read
-                    res.redirect('/read');
+                // Connect to database
+                mongo.connect(DB_URL,function(err, database){
+                    
+                    // Check if able to connect to database
+                    if(err || database === null){
+                        console.log(err);
+                        res.redirect('/');
+                    
+                    }else{
+                        // Set database which will be used
+                        let db = database.db(DB_NAME);
+                        
+                        // Find and delete document by id
+                        db.collection(DB_COLLECTION).deleteOne({"_id": userId}, (err, result) => {
+                            
+                            if(err){
+                                console.log(err);
+                                res.redirect('/');
+                            }else{
+                                // Close connection after document was deleted
+                                database.close();
+                                // Redirect to /read
+                                res.redirect('/read');
+                            }
+                        })
+                    }
                 })
-            })
-        });
+            }
+         });
     }
 }
 
