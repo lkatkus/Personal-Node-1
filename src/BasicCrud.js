@@ -44,10 +44,14 @@ class BasicCrud extends Middleware {
                         let db = database.db(DB_NAME);
 
                         // Check if userName is not taken. count() returns a promise so .then is required.
-                       db.collection(DB_COLLECTION).find({ userName : req.body.userName }).count()
-                       .then((count) => {
+                        db.collection(DB_COLLECTION).find({ userName : req.body.userName }).count()
+                        .then((count) => {
+                            
                             // Redirect if userName exists
                             if(count > 0){
+                                // Close connection after data was inserted
+                                database.close();
+                                // Redirect with error message
                                 res.render('index',{ error:'User with such user name already exists' });
 
                             }else{
@@ -58,7 +62,13 @@ class BasicCrud extends Middleware {
                                     res.redirect('/read');
                                 })
                             }                           
-                       });
+                        })
+                        .catch((err)=>{
+                            // Close connection after data was inserted
+                            database.close();
+                            // Redirect with error message
+                            res.render('index',{ error:'Error occured' });                            
+                        });
                     }
                 })
 
