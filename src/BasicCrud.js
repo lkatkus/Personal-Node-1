@@ -6,6 +6,9 @@ const Middleware = require("srv-core").Middleware;
 const mongo = require('mongodb');
 const objectId = require('mongodb').ObjectID; /* objectId is user to pass document ID to mongoDB */
 
+const { check, validationResult } = require('express-validator/check');
+const { matchedData, sanitize } = require('express-validator/filter');
+
 // Database setup
 const DB_URL ='mongodb://localhost:27017/crud';
 const DB_NAME = 'test';
@@ -17,27 +20,17 @@ class BasicCrud extends Middleware {
         super(app, router);
     }
 
-
-
     bindToRouter() {
 
         this.router.get("/index", (req, res, next) => {
             res.render('index');
-        });
+        }); /* End /index route */
         
         this.router.post("/create", function(req, res, next) {
-            // Create user placeholder object
-            let userData = {};
-
-            // Get data from submited form
-            userData = {
-                userName: req.body.userName,
-                userPassword: req.body.userPassword,
-                userEmail: req.body.userEmail
-            };
 
             // Validate
-            if(validate(userData)){
+            if(validate(req.body)){
+
                 // Connect to database
                 mongo.connect(DB_URL, function(err, database){
                     
@@ -50,12 +43,22 @@ class BasicCrud extends Middleware {
                         // Set database which will be used
                         let db = database.db(DB_NAME);
 
-                        db.collection(DB_COLLECTION).insertOne(userData, function(err, result){
-                            // Close connection after data was inserted
-                            database.close();
-                            // Redirect to /read
-                            res.redirect('/read');
-                        })
+                        // Check if userName is not taken. count() returns a promise so .then is required.
+                       db.collection(DB_COLLECTION).find({ userName : req.body.userName }).count()
+                       .then((count) => {
+                            // Redirect if userName exists
+                            if(count > 0){
+                                res.render('index',{ error:'User with such user name already exists' });
+
+                            }else{
+                                db.collection(DB_COLLECTION).insertOne(req.body, function(err, result){
+                                    // Close connection after data was inserted
+                                    database.close();
+                                    // Redirect to /read
+                                    res.redirect('/read');
+                                })
+                            }                           
+                       });
                     }
                 })
 
@@ -63,7 +66,7 @@ class BasicCrud extends Middleware {
                 res.render('index',{ error:'Validation error' });
             }
 
-        });
+        });/* End /update route */
 
         this.router.get("/read", function(req, res, next) {
 
@@ -96,7 +99,7 @@ class BasicCrud extends Middleware {
                     });
                 }
             })
-        });
+        }); /* End /read route */
 
         this.router.post("/update", function(req, res, next) {
             // Create user placeholder object
@@ -155,7 +158,7 @@ class BasicCrud extends Middleware {
                     res.render('index',{ error:'Validation error' });
                 }
             }
-        });
+        }); /* End /post route */
 
         this.router.post("/delete", function(req, res, next) {         
             
@@ -195,7 +198,7 @@ class BasicCrud extends Middleware {
                     }
                 })
             }
-        });
+        }); /* End /delete route */
 
         // User data validation. Should return true if data is valid
         const validate = (data) => {
