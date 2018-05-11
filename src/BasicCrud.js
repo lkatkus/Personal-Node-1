@@ -10,6 +10,7 @@ const { check, validationResult } = require('express-validator/check');
 const { matchedData, sanitize } = require('express-validator/filter');
 
 const connectToDB = require('./DB/connectToDB');
+const connectionPromise = require('./DB/connectionPromise');
 
 const DB_URL ='mongodb://localhost:27017/crud';
 const DB_NAME = 'test';
@@ -154,23 +155,46 @@ class BasicCrud extends Middleware {
                 // Convert userId to mongo objectId
                 let userId = objectId(req.body.userId);
 
-                connectToDB((database) => {
-                    // Set database which will be used
-                    let db = database.db(DB_NAME);
+                // connectToDB((database) => {
+                //     // Set database which will be used
+                //     let db = database.db(DB_NAME);
                     
-                    // Find and delete document by id
-                    db.collection(DB_COLLECTION).deleteOne({"_id": userId}, (err, result) => {
-                        if(err){
-                            console.log(err);
-                            res.redirect('/');
-                        }else{
-                            // Close connection after document was deleted
-                            database.close();
-                            // Redirect to /read
-                            res.redirect('/read');
-                        }
+                //     // Find and delete document by id
+                //     db.collection(DB_COLLECTION).deleteOne({"_id": userId}, (err, result) => {
+                //         if(err){
+                //             console.log(err);
+                //             res.redirect('/');
+                //         }else{
+                //             // Close connection after document was deleted
+                //             database.close();
+                //             // Redirect to /read
+                //             res.redirect('/read');
+                //         }
+                //     })
+                // })
+
+                // Testing promises
+                connectionPromise()
+                    .then((database)=>{
+                        // Set database which will be used
+                        let db = database.db(DB_NAME);
+
+                        // Find and delete document by id
+                        db.collection(DB_COLLECTION).deleteOne({"_id": userId}, (err, result) => {
+                            if(err){
+                                console.log('ERROR', err);
+                                res.redirect('/');
+                            }else{
+                                // Close connection after document was deleted
+                                database.close();
+                                // Redirect to /read
+                                res.redirect('/read');
+                            }
+                        })
                     })
-                })
+                    .catch((err) => {
+                        res.render('index',{ error: err });
+                    })
             }
         }); /* End /delete route */
 
